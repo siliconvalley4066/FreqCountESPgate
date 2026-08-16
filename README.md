@@ -34,3 +34,7 @@ Libraries: Adafruit_SSD1306<br>
 
 Description is here, although it is written in Japanese language:<br>
 https://ss1.xrea.com/harahore.g2.xrea.com/ESP32/ESP32Counter.html
+
+References:<br>
+kapraran https://github.com/kapraran/FreqCountESP<br>
+siliconvalley4066 https://github.com/siliconvalley4066/FreqCountESP<br>
