@@ -40,3 +40,4 @@ https://ss1.xrea.com/harahore.g2.xrea.com/ESP32/ESP32Counter.html
 # References:
 kapraran https://github.com/kapraran/FreqCountESP<br>
 siliconvalley4066 https://github.com/siliconvalley4066/FreqCountESP<br>
+Tj Lab https://tj-lab.org/2022/12/08/esp32-s3-%e3%82%92%e4%bd%bf%e3%81%a3%e3%81%9f%e5%91%a8%e6%b3%a2%e6%95%b0%e3%82%ab%e3%82%a6%e3%83%b3%e3%82%bf/comment-page-1/<br>
