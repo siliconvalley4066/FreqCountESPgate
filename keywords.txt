@@ -1,0 +1,13 @@
+# classes
+FreqCountESPgate	KEYWORD1
+
+# instances
+FreqCount	KEYWORD2
+
+# methods
+begin	KEYWORD2
+read	KEYWORD2
+end	KEYWORD2
+available	KEYWORD2
+gatetime	KEYWORD2
+pilse_test	KEYWORD2
