@@ -21,6 +21,7 @@ private:
   uint16_t gate_time;
   static uint8_t gate_pin;
   static bool first;
+  pcnt_isr_handle_t pcntisrHandle;
 
 public:
   static esp_timer_handle_t delay_int;

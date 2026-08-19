@@ -1,7 +1,7 @@
 /*
-   ESP32 Frequency Counter Library Version 1.00
+   ESP32 Frequency Counter Library Version 1.01
    The max frequency is 40MHz at 80MHz APB clock.
-   Stable accurate pulse counting by hardware gating.
+   Stable and accurate pulse counting by hardware gating.
    Copyright (c) 2026, Siliconvalley4066
    Licenced under the GNU GPL Version 3.0
 */
@@ -11,7 +11,7 @@ volatile uint32_t FreqCountESPgate::count_ovf;
 volatile uint32_t FreqCountESPgate::fcount;
 volatile bool FreqCountESPgate::fflag;
 bool FreqCountESPgate::first = true;
-esp_timer_handle_t FreqCountESPgate::delay_int;
+esp_timer_handle_t FreqCountESPgate::delay_int = NULL;
 uint8_t FreqCountESPgate::gate_pin = TIME_GATE_PIN;
 
 volatile uint16_t FreqCountESPgate::pulseCountx;
@@ -74,7 +74,7 @@ void FreqCountESPgate::setupPcnt(uint8_t fpin, uint8_t gpin) {
   // enable PCNT overflow interrupt
   pcnt_event_enable(PCNT_UNIT, PCNT_EVT_H_LIM);
   // pcnt_event_enable(PCNT_UNIT, PCNT_EVT_L_LIM);
-  pcnt_isr_register(onPcnt, NULL, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL1, NULL);
+  pcnt_isr_register(onPcnt, NULL, ESP_INTR_FLAG_IRAM, &pcntisrHandle);
   pcnt_intr_enable(PCNT_UNIT);
 
   pcnt_counter_resume(PCNT_UNIT);  // start count
@@ -83,8 +83,9 @@ void FreqCountESPgate::setupPcnt(uint8_t fpin, uint8_t gpin) {
   // LEDC settings for gate signal
 void FreqCountESPgate::setupLedc(uint32_t freq, uint8_t resolution, uint32_t duty) {
   ledcSetClockSource((ledc_clk_cfg_t) LEDC_APB_CLK);
-  ledcAttach(gate_pin, freq, resolution);
+  ledcAttach(gate_pin, 8, 17);
   ledcWrite(gate_pin, duty);
+  ledcChangeFrequency(gate_pin, freq, resolution);
   attachInterrupt(gate_pin, onLedc, FALLING);
 }
 
@@ -134,9 +135,11 @@ uint8_t FreqCountESPgate::available() {
 void FreqCountESPgate::end() {
   pcnt_counter_pause(PCNT_UNIT);
   pcnt_intr_disable(PCNT_UNIT);
-  // pcnt_isr_unregister(isrHandle);
+  pcnt_isr_unregister(pcntisrHandle);
   detachInterrupt(gate_pin);
   ledcDetach(gate_pin);
+  esp_timer_stop(delay_int);
+  esp_timer_delete(delay_int);
 }
 
 #define LEDC_BIT_MAX 16
