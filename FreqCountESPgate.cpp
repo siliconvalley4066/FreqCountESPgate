@@ -1,5 +1,6 @@
+#if !defined(ARDUINO_NOLOGO_ESP32C3_SUPER_MINI) && !defined(ARDUINO_ESP32C3_DEV) && !defined(ARDUINO_WAVESHARE_ESP32_C3_ZERO)
 /*
-   ESP32 Frequency Counter Library Version 1.01
+   ESP32 Frequency Counter Library Version 1.02
    The max frequency is 40MHz at 80MHz APB clock.
    Stable and accurate pulse counting by hardware gating.
    Copyright (c) 2026, Siliconvalley4066
@@ -81,15 +82,18 @@ void FreqCountESPgate::setupPcnt(uint8_t fpin, uint8_t gpin) {
 }
 
   // LEDC settings for gate signal
-void FreqCountESPgate::setupLedc(uint32_t freq, uint8_t resolution, uint32_t duty) {
+bool FreqCountESPgate::setupLedc(uint32_t freq, uint8_t resolution, uint32_t duty) {
   ledcSetClockSource((ledc_clk_cfg_t) LEDC_APB_CLK);
-  ledcAttach(gate_pin, 8, 17);
-  ledcWrite(gate_pin, duty);
+  if (!ledcAttachChannel(gate_pin, 8, 14, LEDC_CHANNEL_7))
+    return false;
   ledcChangeFrequency(gate_pin, freq, resolution);
+  ledcWrite(gate_pin, duty);
   attachInterrupt(gate_pin, onLedc, FALLING);
+  return true;
 }
 
-void FreqCountESPgate::begin(uint16_t msec, uint8_t fpin, uint8_t gpin) {
+bool FreqCountESPgate::begin(uint16_t msec, uint8_t fpin, uint8_t gpin) {
+  bool status;
   count_ovf = 0;
   fflag = false;
   first = true;
@@ -97,16 +101,17 @@ void FreqCountESPgate::begin(uint16_t msec, uint8_t fpin, uint8_t gpin) {
   gate_pin = gpin;
   setupPcnt(fpin, gpin);
   if (msec > 500) // 1sec
-    setupLedc(1, 17, 122880); // 1Hz, 17bit, (1<<17)*15/16
+    status = setupLedc(1, 17, 122880);  // 1Hz, 17bit, (1<<17)*15/16
   else            // 0.1sec
-    setupLedc(8, 14, 12288);  // 8Hz, 14bit, (1<<14)*3/4
-
+    status = setupLedc(8, 14, 12288);   // 8Hz, 14bit, (1<<14)*3/4
+  if (!status) return false;
   const esp_timer_create_args_t timer_args = {
       .callback = &onDelay,
       .arg = NULL,
       .name = "delay_int"
   };
   esp_timer_create(&timer_args, &delay_int);
+  return true;
 }
 
 uint32_t FreqCountESPgate::read() {
@@ -142,19 +147,23 @@ void FreqCountESPgate::end() {
   esp_timer_delete(delay_int);
 }
 
-#define LEDC_BIT_MAX 16
-
 // double pulse_frq(void) {  // 4.768Hz <= pulse_frq <= 40MHz
 //   return(80.0e6 / (1 << p_range) * count / 256.0);
 // }
 
 void FreqCountESPgate::pulse_test(uint8_t gpio_pin, uint32_t freq) {
   freq = constrain(freq, 1, 40000000);
-  byte p_range = constrain(int(log(80e6/freq)/log(2)), 1, LEDC_BIT_MAX);
+  byte resolution = 0;
+  for (long lfreq = 40000000; lfreq >= freq; ++resolution) {
+    lfreq >>= 1;
+  }
+  resolution = constrain(resolution, 1, SOC_LEDC_TIMER_BIT_WIDTH);
   pinMode(gpio_pin, OUTPUT);
   ledcSetClockSource((ledc_clk_cfg_t) LEDC_APB_CLK);
-  ledcAttach(gpio_pin, freq, p_range);
-  ledcWrite(gpio_pin, 1 << (p_range - 1));  // duty 50%
+  ledcAttach(gpio_pin, 20000000, 2);
+  ledcChangeFrequency(gpio_pin, freq, resolution);
+  ledcWrite(gpio_pin, 1 << (resolution - 1)); // duty 50%
 }
 
 FreqCountESPgate FreqCount;
+#endif
