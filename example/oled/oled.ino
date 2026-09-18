@@ -1,7 +1,7 @@
 /*
    ESP32 Frequency Counter example
    The max frequency is 40MHz at 80MHz APB clock.
-   Stable accurate pulse counting by hardware gating.
+   Stable and accurate pulse counting by hardware gating.
       GPIO4  counter input rising edge
       GPIO5  Self gate signal port
       GPIO16 32MHz test signal output
