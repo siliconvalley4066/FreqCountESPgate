@@ -13,8 +13,7 @@ An error of ±32,767 counts may occur during the process of integrating the PCNT
 So, I have developed this new library.
 
 ## Specifications:
-- Nominal gate time is 1 second and 0.1 second.
-- Actual gate time is 937.5ms and 93.75ms.
+- Actual gate time is 1 second and 0.1 second.
 - Frequency range is 1Hz to 40MHz. Practical upper limit is 32MHz.
 - Input voltage range 0 to 3.3V
 
