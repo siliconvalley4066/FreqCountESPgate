@@ -1,6 +1,6 @@
 #if !defined(ARDUINO_NOLOGO_ESP32C3_SUPER_MINI) && !defined(ARDUINO_ESP32C3_DEV) && !defined(ARDUINO_WAVESHARE_ESP32_C3_ZERO)
 /*
-   ESP32 Frequency Counter Library Version 1.04
+   ESP32 Frequency Counter Library Version 1.05
    The max frequency is 40MHz at 80MHz APB clock.
    Stable and accurate pulse counting by hardware gating.
    Copyright (c) 2026, Siliconvalley4066
@@ -121,10 +121,10 @@ void FreqCountESPgate::setupMCPWM(uint32_t freq, uint16_t period_ticks, uint32_t
 bool FreqCountESPgate::begin(uint16_t msec, uint8_t fpin, uint8_t gpin) {
   count_ovf = 0;
   fflag = false;
-  msec = constrain(msec, 1, 13097);  // max (65535 - 50) / 5
+  msec = constrain(msec, 1, 16373);  // max (65535 - 40) / 4
   gate_time = msec;
   gate_pin = gpin;
-  setupMCPWM(5000, 5 * msec + 50, 5 * msec);  // tick=0.2ms : 5*msec High 10ms Low
+  setupMCPWM(4000, 4 * msec + 40, 4 * msec);  // tick=0.25ms : 4*msec High 10ms Low
   attachInterrupt(gate_pin, onMcPwm, FALLING);
   setupPcnt(fpin, gpin);
   mcpwm_timer_start_stop(timer_handle, MCPWM_TIMER_START_NO_STOP);
