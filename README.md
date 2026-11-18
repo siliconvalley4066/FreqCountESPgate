@@ -13,7 +13,7 @@ An error of ±32,767 counts may occur during the process of integrating the PCNT
 So, I have developed this new library.
 
 ## Specifications:
-- Available gate time is 1 milli-second to 13.097 seconds.
+- Available gate time is 1 milli-second to 16.373 seconds.
 - Frequency range is 1Hz to 40MHz. Practical upper limit is 32MHz.
 - Input voltage range 0 to 3.3V
 
